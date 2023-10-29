@@ -1,9 +1,10 @@
 package org.shjwfan.security.token;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.SneakyThrows;
+import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,9 +24,8 @@ public class TokenOncePerRequestFilter extends OncePerRequestFilter {
   private @Autowired TokenService tokenService;
   private @Autowired UserDetailsService userDetailsService;
 
-  @SneakyThrows
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
     String accessToken = StringUtils.substringAfter(authorizationHeader, ACCESS_TOKEN_PREFIX);
     if (accessToken != null) {

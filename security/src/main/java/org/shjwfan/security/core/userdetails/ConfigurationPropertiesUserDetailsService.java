@@ -1,5 +1,6 @@
 package org.shjwfan.security.core.userdetails;
 
+import java.util.Collections;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ConfigurationPropertiesUserDetailsService implements UserDetailsService {
 
   private @Autowired PasswordEncoder passwordEncoder;
-  private Set<ConfigurationPropertiesUserDetails> users;
+  private Set<ConfigurationPropertiesUserDetails> users = Collections.emptySet();
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

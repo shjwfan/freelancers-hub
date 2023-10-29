@@ -76,7 +76,11 @@ public class TokenService {
       throw new TokenException("token is expired");
     } catch (Exception e) {
       String message = e.getMessage();
-      throw new TokenException(message);
+      if (message != null) {
+        throw new TokenException(message);
+      } else {
+        throw new TokenException("can't verify token");
+      }
     }
   }
 

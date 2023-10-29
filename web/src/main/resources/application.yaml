@@ -1,3 +1,15 @@
 spring:
   thymeleaf:
     prefix: classpath:/webapp/dist/
+
+freelancers-hub:
+  token-issuer: www.freelancers-hub.org
+  token-secret: andrey
+  users:
+    - authorities: ADMIN
+      password: andrey
+      username: andrey
+      accountExpiredAt: 2024-05-24T00:00:00Z
+      accountLocked: false
+      credentialsExpiredAt: 2024-05-24T00:00:00Z
+      enabled: true
