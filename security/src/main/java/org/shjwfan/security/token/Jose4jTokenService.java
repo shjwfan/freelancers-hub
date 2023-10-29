@@ -66,7 +66,7 @@ public class Jose4jTokenService implements TokenService {
       return token;
     } catch (JoseException e) {
       String message = e.getMessage();
-      throw new TokenException("can't create token" + (!Objects.isNull(message) ? ", cause " + message : ""));
+      throw new TokenException("can't create token" + (Objects.isNull(message) ? "" : ", cause " + message.toLowerCase()));
     }
   }
 
@@ -136,10 +136,10 @@ public class Jose4jTokenService implements TokenService {
         throw new TokenException("can't verify token, token has invalid issuer");
       }
       String message = e.getMessage();
-      throw new TokenException("can't verify token" + (Objects.isNull(message) ? "" : ", cause " + message));
+      throw new TokenException("can't verify token" + (Objects.isNull(message) ? "" : ", cause " + message.toLowerCase()));
     } catch (Exception e) {
       String message = e.getMessage();
-      throw new TokenException("can't verify token" + (Objects.isNull(message) ? "" : ", cause " + message));
+      throw new TokenException("can't verify token" + (Objects.isNull(message) ? "" : ", cause " + message.toLowerCase()));
     }
   }
 }
