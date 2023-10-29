@@ -3,8 +3,8 @@ spring:
     prefix: classpath:/webapp/dist/
 
 freelancers-hub:
+  token-audience: www.freelancers-hub.org
   token-issuer: www.freelancers-hub.org
-  token-secret: andrey
   users:
     - authorities: ADMIN
       password: andrey
