@@ -1,4 +1,4 @@
-package org.shjwfan;
+package org.shjwfan.web;
 
 import java.util.Map;
 import org.springframework.boot.Banner.Mode;
