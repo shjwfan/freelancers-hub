@@ -16,9 +16,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityFilterChainBeanConfiguration {
 
-  private static final String TOKEN_REQUEST_MATCHER = "/api/v1/token";
-  private static final String TOKEN_REFRESH_REQUEST_MATCHER = "/api/v1/token/refresh";
-
   private @Autowired TokenOncePerRequestFilter tokenOncePerRequestFilter;
 
   @Bean
@@ -35,9 +32,9 @@ public class SecurityFilterChainBeanConfiguration {
 
   private Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry> authorizeHttpRequestsCustomizer() {
     return customizer -> customizer
-        // permit all GET /api/v1/token, GET /api/v1/token/refresh requests
-        .requestMatchers(HttpMethod.GET, TOKEN_REQUEST_MATCHER).permitAll()
-        .requestMatchers(HttpMethod.GET, TOKEN_REFRESH_REQUEST_MATCHER).permitAll()
+        // permit all GET /api/v1/login, GET /api/v1/login/refresh requests
+        .requestMatchers(HttpMethod.GET, "/api/v1/login").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/v1/login/refresh").permitAll()
         .requestMatchers(HttpMethod.GET, "/assets/**").permitAll()
         .requestMatchers(HttpMethod.GET, "/").permitAll()
         .requestMatchers("/api/v1/**").hasAuthority("admin");

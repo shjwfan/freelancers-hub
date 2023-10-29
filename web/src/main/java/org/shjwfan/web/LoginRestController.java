@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class TokenRestController {
+public class LoginRestController {
 
   private @Autowired TokenService tokenService;
   private @Autowired AuthenticationManager authenticationManager;
   private @Autowired UserDetailsService userDetailsService;
 
-  @GetMapping("/api/v1/token")
+  @GetMapping("/api/v1/login")
   public Token token(@Nonnull @RequestParam("username") String username, @Nonnull @RequestParam("password") String password) {
     if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
       throw new TokenException("username or password is blank");
@@ -37,7 +37,7 @@ public class TokenRestController {
     return tokenService.create(username);
   }
 
-  @GetMapping("/api/v1/token/refresh")
+  @GetMapping("/api/v1/login/refresh")
   public Token tokenRefresh(@Nonnull @RequestParam("refreshToken") String currentRefreshToken) {
     if (StringUtils.isBlank(currentRefreshToken)) {
       throw new TokenException("refresh token is blank");
