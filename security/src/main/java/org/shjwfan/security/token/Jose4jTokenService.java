@@ -58,8 +58,6 @@ public class Jose4jTokenService implements TokenService {
       String accessToken = getCompactSerializationUsingRSA(createTokenClaimsJsonPayload(subject, createdAt, accessTokenExpirationMilliseconds), verificationKey);
       String refreshToken = getCompactSerializationUsingRSA(createTokenClaimsJsonPayload(subject, createdAt, refreshTokenExpirationMilliseconds), verificationKey);
 
-      new HmacUsingShaAlgorithm.HmacSha256();
-
       Token token = new Token(accessToken, refreshToken);
       tokenHolder.put(subject, token);
 
