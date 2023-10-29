@@ -1,14 +1,14 @@
-package org.shjwfan.domain;
+package org.shjwfan.business;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
-import org.shjwfan.domain.commons.Domain;
+import org.shjwfan.business.commons.BusinessEntity;
 
 @Entity
-public class Freelancer extends Domain {
+public class Freelancer extends BusinessEntity {
 
   @SuppressWarnings("NullAway.Init")
   @Column(name = "username", nullable = false, length = 32)

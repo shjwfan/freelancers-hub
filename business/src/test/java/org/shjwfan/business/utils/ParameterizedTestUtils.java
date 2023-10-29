@@ -1,4 +1,4 @@
-package org.shjwfan.domain.utils;
+package org.shjwfan.business.utils;
 
 import java.util.stream.Stream;
 import org.apache.commons.lang3.RandomStringUtils;

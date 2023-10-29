@@ -1,13 +1,13 @@
-package org.shjwfan.domain.commons;
+package org.shjwfan.business.commons;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.shjwfan.domain.utils.ParameterizedTestUtils;
+import org.shjwfan.business.utils.ParameterizedTestUtils;
 
-class DomainTest {
+class BusinessEntityTest {
 
   static Stream<String> checkIdMethodSource() {
     return ParameterizedTestUtils.stringMethodSource();
@@ -16,7 +16,7 @@ class DomainTest {
   @ParameterizedTest
   @MethodSource("checkIdMethodSource")
   void setIdTest(String id) {
-    Domain domain = new Domain();
-    assertThrows(DomainException.class, () -> domain.setId(id), "id must be not blank");
+    BusinessEntity businessEntity = new BusinessEntity();
+    assertThrows(BusinessException.class, () -> businessEntity.setId(id), "id must be not blank");
   }
 }

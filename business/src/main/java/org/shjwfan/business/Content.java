@@ -1,4 +1,4 @@
-package org.shjwfan.domain;
+package org.shjwfan.business;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;

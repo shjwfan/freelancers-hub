@@ -1,4 +1,4 @@
-package org.shjwfan.domain.commons;
+package org.shjwfan.business.commons;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Id;
@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @MappedSuperclass
-public class Domain {
+public class BusinessEntity {
 
   @SuppressWarnings("NullAway.Init")
   @Id
@@ -34,8 +34,8 @@ public class Domain {
       return false;
     }
 
-    Domain domain = (Domain) o;
-    return new EqualsBuilder().append(id, domain.id)
+    BusinessEntity businessEntity = (BusinessEntity) o;
+    return new EqualsBuilder().append(id, businessEntity.id)
         .isEquals();
   }
 
@@ -47,7 +47,7 @@ public class Domain {
 
   private void checkId(@Nullable String id) {
     if (StringUtils.isBlank(id)) {
-      throw new DomainException("id must be not blank");
+      throw new BusinessException("id must be not blank");
     }
   }
 }

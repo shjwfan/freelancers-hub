@@ -1,12 +1,12 @@
-package org.shjwfan.domain;
+package org.shjwfan.business;
 
 import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.HashSet;
-import org.shjwfan.domain.commons.NamedDomain;
+import org.shjwfan.business.commons.NamedBusinessEntity;
 
 @Entity
-public class Pack extends NamedDomain {
+public class Pack extends NamedBusinessEntity {
 
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "pack_themes", joinColumns = @JoinColumn(name = "pack_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "theme_id", nullable = false))

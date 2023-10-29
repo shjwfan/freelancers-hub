@@ -1,13 +1,13 @@
-package org.shjwfan.domain;
+package org.shjwfan.business;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.HashSet;
-import org.shjwfan.domain.commons.NamedDomain;
+import org.shjwfan.business.commons.NamedBusinessEntity;
 
 @Entity
-public class Work extends NamedDomain {
+public class Work extends NamedBusinessEntity {
 
   @SuppressWarnings("NullAway.Init")
   @Embedded

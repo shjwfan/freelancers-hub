@@ -1,4 +1,4 @@
-package org.shjwfan.domain.commons;
+package org.shjwfan.business.commons;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
@@ -6,7 +6,7 @@ import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.lang3.StringUtils;
 
 @MappedSuperclass
-public class NamedDomain extends Domain {
+public class NamedBusinessEntity extends BusinessEntity {
 
   @SuppressWarnings("NullAway.Init")
   @Column(name = "name", nullable = false, length = 32)
@@ -34,7 +34,7 @@ public class NamedDomain extends Domain {
 
   private void checkName(@Nullable String name) {
     if (StringUtils.isBlank(name) || name.length() > 32) {
-      throw new DomainException("name must be not blank, name length must be between 1 and 32 characters");
+      throw new BusinessException("name must be not blank, name length must be between 1 and 32 characters");
     }
   }
 }

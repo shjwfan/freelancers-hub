@@ -17,7 +17,7 @@
     <!-- project -->
     <dependency>
       <groupId>org.shjwfan</groupId>
-      <artifactId>domain</artifactId>
+      <artifactId>business</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <!-- project -->

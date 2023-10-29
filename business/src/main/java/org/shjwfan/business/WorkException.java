@@ -1,4 +1,4 @@
-package org.shjwfan.domain;
+package org.shjwfan.business;
 
 public class WorkException extends RuntimeException {
 
