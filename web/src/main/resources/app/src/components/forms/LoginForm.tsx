@@ -34,7 +34,7 @@ const LoginForm = () => {
   return (
     <form onSubmit={e => void handleSubmit(onSubmit)(e)}>
       <div className='row'>
-        <div className='col-3 m-auto mt-5 text-center'>
+        <div className='col-md-3 m-auto mt-5 text-center'>
           <h2>Login</h2>
           <span className='text-secondary'>
             No account yet?{' '}
@@ -45,7 +45,7 @@ const LoginForm = () => {
         </div>
       </div>
       <div className='row'>
-        <div className='col-3 m-auto'>
+        <div className='col-md-3 m-auto'>
           <div className='form-group mt-5'>
             <label
               className='form-label text-secondary'

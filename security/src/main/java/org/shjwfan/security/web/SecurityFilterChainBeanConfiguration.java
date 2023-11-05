@@ -36,7 +36,7 @@ public class SecurityFilterChainBeanConfiguration {
         .requestMatchers(HttpMethod.GET, "/api/v1/login").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/v1/login/refresh").permitAll()
         .requestMatchers(HttpMethod.GET, "/assets/**").permitAll()
-        .requestMatchers(HttpMethod.GET, "/").permitAll()
+        .requestMatchers(HttpMethod.GET, "/app/**").permitAll()
         .requestMatchers("/api/v1/**").hasAuthority("admin");
   }
 }
