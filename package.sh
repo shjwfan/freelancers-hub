@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd web/src/main/resources/webapp || exit 1
+cd web/src/main/resources/app || exit 1
 
 if yarn lint; then
   echo "Linting completed"

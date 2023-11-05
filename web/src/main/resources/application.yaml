@@ -1,6 +1,6 @@
 spring:
   thymeleaf:
-    prefix: classpath:/webapp/dist/
+    prefix: classpath:/app/dist/
 
 freelancers-hub:
   token-audience: www.freelancers-hub.org
