@@ -33,8 +33,8 @@ public class Jose4jTokenService implements TokenService {
   private final Key verificationKey;
   private final TokenHolder tokenHolder;
 
-  public Jose4jTokenService(@Value("${freelancers-hub.access-token-expiration-millis:45000}") int accessTokenExpirationMilliseconds,
-                            @Value("${freelancers-hub.refresh-token-expiration-millis:90000}") int refreshTokenExpirationMilliseconds,
+  public Jose4jTokenService(@Value("${freelancers-hub.access-token-expiration-ms:45000}") int accessTokenExpirationMilliseconds,
+                            @Value("${freelancers-hub.refresh-token-expiration-ms:90000}") int refreshTokenExpirationMilliseconds,
                             @Value("${freelancers-hub.token-audience}") String audience,
                             @Value("${freelancers-hub.token-issuer}") String issuer,
                             TokenHolder tokenHolder) {
