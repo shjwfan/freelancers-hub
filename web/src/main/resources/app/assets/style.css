@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
 
-.navbar-brand, .permanent-marker {
-    font-family: 'Permanent Marker', cursive
+.navbar-brand,
+.permanent-marker {
+  font-family: 'Permanent Marker', cursive;
 }

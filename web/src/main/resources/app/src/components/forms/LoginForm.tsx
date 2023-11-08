@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import axios from 'axios';
 
@@ -6,6 +7,7 @@ type Credentials = {
   password: string;
 };
 
+// api namespace?
 type Token = {
   accessToken: string;
   refreshToken: string;
@@ -19,16 +21,32 @@ const LoginForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<Credentials>();
+  const [requestResult, setRequestResult] = useState<api.RequestResult | null>(
+    null,
+  );
   const onSubmit: SubmitHandler<Credentials> = (credentials: Credentials) => {
     const url = new URL('/api/v1/login', window.origin);
     url.searchParams.set('username', credentials.username);
     url.searchParams.set('password', credentials.password);
 
+    setRequestResult(api.RequestResult.Progress);
     axios
       .get<Token>(url.toString())
-      .then(response => response.data)
-      .then(data => console.log(data))
-      .catch(error => console.error(error));
+      .then(response => {
+        if (response.status != 200) {
+          throw new Error(`unsucceeded request result with status: ${status}`);
+        }
+        return response.data;
+      })
+      .then(data => {
+        setRequestResult(api.RequestResult.Succeeded);
+        setTimeout(() => setRequestResult(null), 10 * 1000);
+      })
+      .catch(error => {
+        setRequestResult(api.RequestResult.UnSucceeded);
+        setTimeout(() => setRequestResult(null), 10 * 1000);
+        console.error(error);
+      });
   };
 
   return (
@@ -89,7 +107,7 @@ const LoginForm = () => {
             />
             {errors.password && (
               <div className={'invalid-feedback'}>
-                Username is required, must consist of only English alphabet
+                Password is required, must consist of only English alphabet
                 and/or numbers and/or symbols and be between 4 and 32
                 characters.
               </div>
@@ -98,6 +116,30 @@ const LoginForm = () => {
           <button className='btn btn-primary mt-3' type='submit'>
             Login
           </button>
+          {requestResult == api.RequestResult.Progress && (
+            <div
+              className='col-md-3 m-auto mt-3 alert alert-warning'
+              role='alert'
+            >
+              Loading...
+            </div>
+          )}
+          {requestResult == api.RequestResult.Succeeded && (
+            <div
+              className='col-md-3 m-auto mt-3 alert alert-success'
+              role='alert'
+            >
+              Login succeeded.
+            </div>
+          )}
+          {requestResult == api.RequestResult.UnSucceeded && (
+            <div
+              className='col-md-3 m-auto mt-3 alert alert-danger'
+              role='alert'
+            >
+              Login unsucceeded.
+            </div>
+          )}
         </div>
       </div>
     </form>
