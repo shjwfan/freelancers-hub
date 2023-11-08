@@ -1,58 +1,70 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { RequestResult } from '../../api/models.ts';
+import useApi from '../../api/hooks.ts';
 
 const FooBarForm = () => {
   const [fooRequestResult, setFooRequestResult] =
-    useState<api.RequestResult | null>(null);
+    useState<RequestResult | null>(null);
   const [barRequestResult, setBarRequestResult] =
-    useState<api.RequestResult | null>(null);
+    useState<RequestResult | null>(null);
+  const fooBarApi = useApi().fooBarApi;
 
   const request = (
     foobar: 'foo' | 'bar',
     onSucceed: () => void,
     onUnSucceed: () => void,
   ) => {
-    const url = new URL(foobar, window.origin);
-    axios
-      .get<string>(url.toString())
+    let promise;
+    switch (foobar) {
+      case 'foo': {
+        promise = fooBarApi.foo();
+        break;
+      }
+      case 'bar': {
+        promise = fooBarApi.bar();
+        break;
+      }
+    }
+    promise
       .then(response => {
         if (response.status != 200) {
           throw new Error(`unsucceeded request result with status: ${status}`);
         }
         return response.data;
       })
-      .then(data => {
+      .then(() => {
         onSucceed();
       })
-      .catch(error => {
+      .catch(() => {
         onUnSucceed();
-        console.error(error);
       });
   };
 
   useEffect(() => {
+    setFooRequestResult(RequestResult.Progress);
     request(
       'foo',
       () => {
-        setFooRequestResult(api.RequestResult.Succeeded);
+        setFooRequestResult(RequestResult.Succeeded);
         setTimeout(() => setFooRequestResult(null), 10 * 1000);
       },
       () => {
-        setFooRequestResult(api.RequestResult.UnSucceeded);
+        setFooRequestResult(RequestResult.UnSucceeded);
         setTimeout(() => setFooRequestResult(null), 10 * 1000);
       },
     );
   }, []);
 
   useEffect(() => {
+    setBarRequestResult(RequestResult.Progress);
     request(
       'bar',
       () => {
-        setBarRequestResult(api.RequestResult.Succeeded);
+        setBarRequestResult(RequestResult.Succeeded);
         setTimeout(() => setBarRequestResult(null), 10 * 1000);
       },
       () => {
-        setBarRequestResult(api.RequestResult.UnSucceeded);
+        setBarRequestResult(RequestResult.UnSucceeded);
         setTimeout(() => setBarRequestResult(null), 10 * 1000);
       },
     );
@@ -60,42 +72,48 @@ const FooBarForm = () => {
 
   return (
     <div className='row'>
-      <div className='col-md-3 m-auto mt-5 text-center'>
+      <div className='col-md-12 m-auto mt-5 text-center'>
         <h2>Foo</h2>
+        {fooRequestResult == RequestResult.Progress && (
+          /* warning alert */
+          <div className='alert alert-warning mt-3' role='alert'>
+            Loading foo...
+          </div>
+        )}
+        {fooRequestResult == RequestResult.Succeeded && (
+          /* success alert */
+          <div className='alert alert-success mt-3' role='alert'>
+            Foo succeeded.
+          </div>
+        )}
+        {fooRequestResult == RequestResult.UnSucceeded && (
+          /* danger alert */
+          <div className='alert alert-danger mt-3' role='alert'>
+            Foo unsucceeded.
+          </div>
+        )}
       </div>
-      {fooRequestResult == api.RequestResult.Progress && (
-        <div className='col-md-3 m-auto mt-3 alert alert-warning' role='alert'>
-          Loading foo...
-        </div>
-      )}
-      {fooRequestResult == api.RequestResult.Succeeded && (
-        <div className='col-md-3 m-auto mt-3 alert alert-success' role='alert'>
-          Foo succeeded.
-        </div>
-      )}
-      {fooRequestResult == api.RequestResult.UnSucceeded && (
-        <div className='col-md-3 m-auto mt-3 alert alert-danger' role='alert'>
-          Foo unsucceeded.
-        </div>
-      )}
-      <div className='col-md-3 m-auto mt-5 text-center'>
+      <div className='col-md-12 m-auto mt-5 text-center'>
         <h2>Bar</h2>
+        {barRequestResult == RequestResult.Progress && (
+          /* warning alert */
+          <div className='alert alert-warning mt-3' role='alert'>
+            Loading bar...
+          </div>
+        )}
+        {barRequestResult == RequestResult.Succeeded && (
+          /* success alert */
+          <div className='alert alert-success mt-3' role='alert'>
+            Bar succeeded.
+          </div>
+        )}
+        {barRequestResult == RequestResult.UnSucceeded && (
+          /* danger alert */
+          <div className='alert alert-danger mt-3' role='alert'>
+            Bar unsucceeded.
+          </div>
+        )}
       </div>
-      {barRequestResult == api.RequestResult.Progress && (
-        <div className='col-md-3 m-auto mt-3 alert alert-warning' role='alert'>
-          Loading bar...
-        </div>
-      )}
-      {barRequestResult == api.RequestResult.Succeeded && (
-        <div className='col-md-3 m-auto mt-3 alert alert-success' role='alert'>
-          Bar succeeded.
-        </div>
-      )}
-      {barRequestResult == api.RequestResult.UnSucceeded && (
-        <div className='col-md-3 m-auto mt-3 alert alert-danger' role='alert'>
-          Bar unsucceeded.
-        </div>
-      )}
     </div>
   );
 };

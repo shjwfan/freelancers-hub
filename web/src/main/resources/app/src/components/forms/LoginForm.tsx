@@ -1,37 +1,30 @@
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import axios from 'axios';
+import { RequestResult } from '../../api/models.ts';
+import useApi from '../../api/hooks.ts';
 
 type Credentials = {
   username: string;
   password: string;
 };
 
-// api namespace?
-type Token = {
-  accessToken: string;
-  refreshToken: string;
-};
-
 const PATTERN = /^[a-zA-Z0-9!@#$%^&*()_+{}[\]:;<>,.?~|\\/-]{4,32}$/g;
 
 const LoginForm = () => {
+  const [requestResult, setRequestResult] = useState<RequestResult | null>(
+    null,
+  );
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<Credentials>();
-  const [requestResult, setRequestResult] = useState<api.RequestResult | null>(
-    null,
-  );
-  const onSubmit: SubmitHandler<Credentials> = (credentials: Credentials) => {
-    const url = new URL('/api/v1/login', window.origin);
-    url.searchParams.set('username', credentials.username);
-    url.searchParams.set('password', credentials.password);
+  const loginApi = useApi().loginApi;
 
-    setRequestResult(api.RequestResult.Progress);
-    axios
-      .get<Token>(url.toString())
+  const onSubmit: SubmitHandler<Credentials> = (credentials: Credentials) => {
+    setRequestResult(RequestResult.Progress);
+    loginApi
+      .login(credentials.username, credentials.password)
       .then(response => {
         if (response.status != 200) {
           throw new Error(`unsucceeded request result with status: ${status}`);
@@ -39,13 +32,16 @@ const LoginForm = () => {
         return response.data;
       })
       .then(data => {
-        setRequestResult(api.RequestResult.Succeeded);
+        setRequestResult(RequestResult.Succeeded);
         setTimeout(() => setRequestResult(null), 10 * 1000);
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
       })
       .catch(error => {
-        setRequestResult(api.RequestResult.UnSucceeded);
+        setRequestResult(RequestResult.UnSucceeded);
         setTimeout(() => setRequestResult(null), 10 * 1000);
-        console.error(error);
+        localStorage.setItem('accessToken', '');
+        localStorage.setItem('refreshToken', '');
       });
   };
 
@@ -116,27 +112,21 @@ const LoginForm = () => {
           <button className='btn btn-primary mt-3' type='submit'>
             Login
           </button>
-          {requestResult == api.RequestResult.Progress && (
-            <div
-              className='col-md-3 m-auto mt-3 alert alert-warning'
-              role='alert'
-            >
+          {requestResult == RequestResult.Progress && (
+            /* warning alert */
+            <div className='alert alert-warning mt-3' role='alert'>
               Loading...
             </div>
           )}
-          {requestResult == api.RequestResult.Succeeded && (
-            <div
-              className='col-md-3 m-auto mt-3 alert alert-success'
-              role='alert'
-            >
+          {requestResult == RequestResult.Succeeded && (
+            /* success alert */
+            <div className='alert alert-success mt-3' role='alert'>
               Login succeeded.
             </div>
           )}
-          {requestResult == api.RequestResult.UnSucceeded && (
-            <div
-              className='col-md-3 m-auto mt-3 alert alert-danger'
-              role='alert'
-            >
+          {requestResult == RequestResult.UnSucceeded && (
+            /* danger alert */
+            <div className='alert alert-danger mt-3' role='alert'>
               Login unsucceeded.
             </div>
           )}
