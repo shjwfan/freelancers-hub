@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { RequestResult } from '../../api/models.ts';
-import useApi from '../../api/hooks.ts';
+import { RequestResult } from '../../hooks/api/models';
+import useApi from '../../hooks/api';
 
 type Credentials = {
   username: string;
@@ -23,25 +23,32 @@ const LoginForm = () => {
 
   const onSubmit: SubmitHandler<Credentials> = (credentials: Credentials) => {
     setRequestResult(RequestResult.Progress);
+
+    localStorage.accessToken = '';
+    localStorage.refreshToken = '';
+
     loginApi
       .login(credentials.username, credentials.password)
       .then(response => {
         if (response.status != 200) {
-          throw new Error(`unsucceeded request result with status: ${status}`);
+          throw new Error(
+            `unsucceeded request result with status: ${response.status}`,
+          );
         }
         return response.data;
       })
       .then(data => {
         setRequestResult(RequestResult.Succeeded);
         setTimeout(() => setRequestResult(null), 10 * 1000);
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
+
+        localStorage.accessToken = data.accessToken;
+        localStorage.refreshToken = data.refreshToken;
       })
       .catch(error => {
         setRequestResult(RequestResult.UnSucceeded);
         setTimeout(() => setRequestResult(null), 10 * 1000);
-        localStorage.setItem('accessToken', '');
-        localStorage.setItem('refreshToken', '');
+
+        console.debug(error);
       });
   };
 

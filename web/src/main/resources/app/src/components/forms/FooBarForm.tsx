@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { RequestResult } from '../../api/models.ts';
-import useApi from '../../api/hooks.ts';
+import { RequestResult } from '../../hooks/api/models';
+import useApi from '../../hooks/api';
 
 const FooBarForm = () => {
   const [fooRequestResult, setFooRequestResult] =
@@ -35,8 +35,9 @@ const FooBarForm = () => {
       .then(() => {
         onSucceed();
       })
-      .catch(() => {
+      .catch(error => {
         onUnSucceed();
+        console.debug(error);
       });
   };
 

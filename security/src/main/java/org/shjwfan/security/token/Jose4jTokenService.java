@@ -9,7 +9,6 @@ import java.security.Key;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Objects;
-import org.jose4j.jws.HmacUsingShaAlgorithm;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.NumericDate;
@@ -26,8 +25,8 @@ public class Jose4jTokenService implements TokenService {
 
   private static final String ALGORITHM_HEADER_VALUE = HMAC_SHA256;
 
-  private final int accessTokenExpirationMilliseconds;
-  private final int refreshTokenExpirationMilliseconds;
+  private final long accessTokenExpirationMilliseconds;
+  private final long refreshTokenExpirationMilliseconds;
   private final String audience;
   private final String issuer;
   private final Key verificationKey;
@@ -76,7 +75,7 @@ public class Jose4jTokenService implements TokenService {
     return jws.getCompactSerialization();
   }
 
-  private String createTokenClaimsJsonPayload(String subject, Instant createdAt, int tokenExpirationMilliseconds) {
+  private String createTokenClaimsJsonPayload(String subject, Instant createdAt, long tokenExpirationMilliseconds) {
     JwtClaims jwtClaims = new JwtClaims();
     jwtClaims.setAudience(audience);
 
