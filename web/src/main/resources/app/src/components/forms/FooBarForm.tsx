@@ -28,7 +28,9 @@ const FooBarForm = () => {
     promise
       .then(response => {
         if (response.status != 200) {
-          throw new Error(`unsucceeded request result with status: ${status}`);
+          throw new Error(
+            `unsucceeded request result with status: ${response.status}`,
+          );
         }
         return response.data;
       })
