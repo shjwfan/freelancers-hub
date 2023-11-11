@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { RequestResult } from '../../hooks/api/models';
 import useApi from '../../hooks/api';
 
@@ -9,39 +9,38 @@ const FooBarForm = () => {
     useState<RequestResult | null>(null);
   const fooBarApi = useApi().fooBarApi;
 
-  const request = (
-    foobar: 'foo' | 'bar',
-    onSucceed: () => void,
-    onUnSucceed: () => void,
-  ) => {
-    let promise;
-    switch (foobar) {
-      case 'foo': {
-        promise = fooBarApi.foo();
-        break;
-      }
-      case 'bar': {
-        promise = fooBarApi.bar();
-        break;
-      }
-    }
-    promise
-      .then(response => {
-        if (response.status != 200) {
-          throw new Error(
-            `unsucceeded request result with status: ${response.status}`,
-          );
+  const request = useCallback(
+    (foobar: 'foo' | 'bar', onSucceed: () => void, onUnSucceed: () => void) => {
+      let promise;
+      switch (foobar) {
+        case 'foo': {
+          promise = fooBarApi.foo();
+          break;
         }
-        return response.data;
-      })
-      .then(() => {
-        onSucceed();
-      })
-      .catch(error => {
-        onUnSucceed();
-        console.debug(error);
-      });
-  };
+        case 'bar': {
+          promise = fooBarApi.bar();
+          break;
+        }
+      }
+      promise
+        .then(response => {
+          if (response.status != 200) {
+            throw new Error(
+              `unsucceeded request result with status: ${response.status}`,
+            );
+          }
+          return response.data;
+        })
+        .then(() => {
+          onSucceed();
+        })
+        .catch(error => {
+          onUnSucceed();
+          console.debug(error);
+        });
+    },
+    [fooBarApi],
+  );
 
   useEffect(() => {
     setFooRequestResult(RequestResult.Progress);
@@ -56,7 +55,7 @@ const FooBarForm = () => {
         setTimeout(() => setFooRequestResult(null), 10 * 1000);
       },
     );
-  }, []);
+  }, [request]);
 
   useEffect(() => {
     setBarRequestResult(RequestResult.Progress);
@@ -71,7 +70,7 @@ const FooBarForm = () => {
         setTimeout(() => setBarRequestResult(null), 10 * 1000);
       },
     );
-  }, []);
+  }, [request]);
 
   return (
     <div className='row'>
