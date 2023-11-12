@@ -1,7 +1,6 @@
 import * as axios from 'axios';
 import { Token } from './models';
 
-const MAX_RETRY_COUNT = 3;
 const PERMIT_ALL_URLS = ['/api/v1/login', '/api/v1/login/refresh'];
 
 const permitAll = (config: axios.InternalAxiosRequestConfig) => {
@@ -70,63 +69,72 @@ const apiInstance: ApiInstance = {
   },
 };
 
+const withAccessToken = (config: axios.InternalAxiosRequestConfig) => {
+  const accessToken = localStorage.accessToken as string;
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  return config;
+};
+
 axiosInstance.interceptors.request.use(
   config => {
     if (!permitAll(config)) {
-      const accessToken = localStorage.accessToken as string;
-      if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
-      }
+      withAccessToken(config);
     }
     return config;
   },
   async (error: axios.AxiosError) => Promise.reject(error),
 );
 
+let refreshPromise: Promise<axios.InternalAxiosRequestConfig> | null = null;
+
 axiosInstance.interceptors.response.use(
   response => response,
   async (error: axios.AxiosError) => {
-    const config = error.config as axios.InternalAxiosRequestConfig & {
-      retryCount: number;
-    };
+    const config = error.config as axios.InternalAxiosRequestConfig;
 
-    const currentRefreshToken = localStorage.refreshToken as string;
-    if (!currentRefreshToken) {
-      config.retryCount = config.retryCount ?? 1;
-      if (config.retryCount < MAX_RETRY_COUNT) {
-        config.retryCount++;
-        return axiosInstance(config);
+    if (!permitAll(config) && error.response?.status == 403) {
+      if (!refreshPromise) {
+        const currentRefreshToken = localStorage.refreshToken as string;
+        if (currentRefreshToken) {
+          refreshPromise = new Promise<axios.InternalAxiosRequestConfig>(
+            (resolve, reject) => {
+              localStorage.accessToken = '';
+              localStorage.refreshToken = '';
+
+              apiInstance.loginApi
+                .loginRefresh(currentRefreshToken)
+                .then(response => {
+                  if (response.status != 200) {
+                    throw new Error(
+                      `unsucceeded login refresh request result with status: ${response.status}`,
+                    );
+                  }
+                  return response.data;
+                })
+                .then(data => {
+                  localStorage.accessToken = data.accessToken;
+                  localStorage.refreshToken = data.refreshToken;
+
+                  resolve(config);
+                })
+                .catch(error => reject(error))
+                .finally(() => (refreshPromise = null));
+            },
+          );
+
+          return refreshPromise
+            .then(config => axiosInstance(withAccessToken(config)))
+            .catch(error => Promise.reject(error));
+        }
+      } else {
+        return refreshPromise
+          .then(config => axiosInstance(withAccessToken(config)))
+          .catch(error => Promise.reject(error));
       }
     }
 
-    if (
-      !permitAll(config) &&
-      currentRefreshToken &&
-      error.response?.status === 403
-    ) {
-      localStorage.accessToken = '';
-      localStorage.refreshToken = '';
-
-      return apiInstance.loginApi
-        .loginRefresh(currentRefreshToken)
-        .then(response => {
-          if (response.status != 200) {
-            throw new Error(
-              `unsucceeded login refresh request result with status: ${response.status}`,
-            );
-          }
-          return response.data;
-        })
-        .then(data => {
-          localStorage.accessToken = data.accessToken;
-          localStorage.refreshToken = data.refreshToken;
-
-          config.headers.Authorization = `Bearer ${data.accessToken}`;
-
-          return axiosInstance(config);
-        })
-        .catch((error: axios.AxiosError) => Promise.reject(error));
-    }
     return Promise.reject(error);
   },
 );
