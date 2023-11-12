@@ -126,15 +126,22 @@ axiosInstance.interceptors.response.use(
 
           return refreshPromise
             .then(config => axiosInstance(withAccessToken(config)))
-            .catch(error => Promise.reject(error));
+            .catch(error => {
+              console.debug(error);
+              return Promise.reject(error);
+            });
         }
       } else {
         return refreshPromise
           .then(config => axiosInstance(withAccessToken(config)))
-          .catch(error => Promise.reject(error));
+          .catch(error => {
+            console.debug(error);
+            return Promise.reject(error);
+          });
       }
     }
 
+    console.debug(error);
     return Promise.reject(error);
   },
 );
