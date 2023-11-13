@@ -10,7 +10,12 @@ const FooBarForm = () => {
   const fooBarApi = useApi().fooBarApi;
 
   const request = useCallback(
-    (foobar: 'foo' | 'bar', onSucceed: () => void, onUnSucceed: () => void) => {
+    (
+      foobar: 'foo' | 'bar',
+      onThen: () => void,
+      onCatch: () => void,
+      onFinally: () => void,
+    ) => {
       let promise;
       switch (foobar) {
         case 'foo': {
@@ -31,13 +36,12 @@ const FooBarForm = () => {
           }
           return response.data;
         })
-        .then(() => {
-          onSucceed();
-        })
+        .then(() => onThen())
         .catch(error => {
-          onUnSucceed();
+          onCatch();
           console.debug(error);
-        });
+        })
+        .finally(() => onFinally());
     },
     [fooBarApi],
   );
@@ -46,14 +50,9 @@ const FooBarForm = () => {
     setFooRequestResult(RequestResult.Progress);
     request(
       'foo',
-      () => {
-        setFooRequestResult(RequestResult.Succeeded);
-        setTimeout(() => setFooRequestResult(null), 10 * 1000);
-      },
-      () => {
-        setFooRequestResult(RequestResult.UnSucceeded);
-        setTimeout(() => setFooRequestResult(null), 10 * 1000);
-      },
+      () => setFooRequestResult(RequestResult.Succeeded),
+      () => setFooRequestResult(RequestResult.UnSucceeded),
+      () => setTimeout(() => setFooRequestResult(null), 10 * 1000),
     );
   }, [request]);
 
@@ -61,14 +60,9 @@ const FooBarForm = () => {
     setBarRequestResult(RequestResult.Progress);
     request(
       'bar',
-      () => {
-        setBarRequestResult(RequestResult.Succeeded);
-        setTimeout(() => setBarRequestResult(null), 10 * 1000);
-      },
-      () => {
-        setBarRequestResult(RequestResult.UnSucceeded);
-        setTimeout(() => setBarRequestResult(null), 10 * 1000);
-      },
+      () => setBarRequestResult(RequestResult.Succeeded),
+      () => setBarRequestResult(RequestResult.UnSucceeded),
+      () => setTimeout(() => setBarRequestResult(null), 10 * 1000),
     );
   }, [request]);
 

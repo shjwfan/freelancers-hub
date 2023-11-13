@@ -39,17 +39,16 @@ const LoginForm = () => {
       })
       .then(data => {
         setRequestResult(RequestResult.Succeeded);
-        setTimeout(() => setRequestResult(null), 10 * 1000);
 
         localStorage.accessToken = data.accessToken;
         localStorage.refreshToken = data.refreshToken;
       })
       .catch(error => {
         setRequestResult(RequestResult.UnSucceeded);
-        setTimeout(() => setRequestResult(null), 10 * 1000);
 
         console.debug(error);
-      });
+      })
+      .finally(() => setTimeout(() => setRequestResult(null), 10 * 1000));
   };
 
   return (
