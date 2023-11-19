@@ -1,19 +1,20 @@
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { RequestResult } from '../../hooks/api/models';
-import useApi from '../../hooks/api';
+import useApi, { RequestResult } from '../../hooks/api';
+import * as axios from 'axios';
+import Alert from '../Alert.tsx';
+import { PASSWORD_PATTERN, USERNAME_PATTERN } from './utils.ts';
 
 type Credentials = {
   username: string;
   password: string;
 };
 
-const PATTERN = /^[a-zA-Z0-9!@#$%^&*()_+{}[\]:;<>,.?~|\\/-]{4,32}$/g;
-
 const LoginForm = () => {
   const [requestResult, setRequestResult] = useState<RequestResult | null>(
     null,
   );
+  const [error, setError] = useState<number | null>(null);
   const {
     register,
     handleSubmit,
@@ -22,40 +23,37 @@ const LoginForm = () => {
   const loginApi = useApi().loginApi;
 
   const onSubmit: SubmitHandler<Credentials> = (credentials: Credentials) => {
-    setRequestResult(RequestResult.Progress);
+    setRequestResult(RequestResult.Loading);
 
     localStorage.accessToken = '';
     localStorage.refreshToken = '';
 
     loginApi
       .login(credentials.username, credentials.password)
-      .then(response => {
-        if (response.status != 200) {
-          throw new Error(
-            `unsucceeded request result with status: ${response.status}`,
-          );
-        }
-        return response.data;
-      })
+      .then(response => response.data)
       .then(data => {
         setRequestResult(RequestResult.Succeeded);
 
         localStorage.accessToken = data.accessToken;
         localStorage.refreshToken = data.refreshToken;
       })
-      .catch(error => {
+      .catch((error: axios.AxiosError) => {
+        setError(error.response?.status ?? null);
         setRequestResult(RequestResult.UnSucceeded);
-
-        console.debug(error);
       })
-      .finally(() => setTimeout(() => setRequestResult(null), 10 * 1000));
+      .finally(() =>
+        setTimeout(() => {
+          setError(null);
+          setRequestResult(null);
+        }, 10 * 1000),
+      );
   };
 
   return (
     <form onSubmit={e => void handleSubmit(onSubmit)(e)}>
       <div className='row'>
         <div className='col-md-3 m-auto mt-5 text-center'>
-          <h2>Login</h2>
+          <h2 className='permanent-marker'>Login</h2>
           <span className='text-secondary'>
             No account yet?{' '}
             <a className='link-offset-1' href='#'>
@@ -79,7 +77,7 @@ const LoginForm = () => {
               placeholder='Enter username'
               {...register('username', {
                 required: true,
-                pattern: PATTERN,
+                pattern: USERNAME_PATTERN,
               })}
             />
             {errors.username && (
@@ -104,7 +102,7 @@ const LoginForm = () => {
               type='password'
               {...register('password', {
                 required: true,
-                pattern: PATTERN,
+                pattern: PASSWORD_PATTERN,
               })}
             />
             {errors.password && (
@@ -118,23 +116,18 @@ const LoginForm = () => {
           <button className='btn btn-primary mt-3' type='submit'>
             Login
           </button>
-          {requestResult == RequestResult.Progress && (
-            /* warning alert */
-            <div className='alert alert-warning mt-3' role='alert'>
-              Loading...
-            </div>
-          )}
-          {requestResult == RequestResult.Succeeded && (
-            /* success alert */
-            <div className='alert alert-success mt-3' role='alert'>
-              Login succeeded.
-            </div>
-          )}
-          {requestResult == RequestResult.UnSucceeded && (
-            /* danger alert */
-            <div className='alert alert-danger mt-3' role='alert'>
-              Login unsucceeded.
-            </div>
+          {requestResult && (
+            <Alert requestResult={requestResult}>
+              {requestResult === RequestResult.Loading && !error && (
+                <span>Loading...</span>
+              )}
+              {requestResult === RequestResult.Succeeded && !error && (
+                <span>Login succeeded.</span>
+              )}
+              {requestResult === RequestResult.UnSucceeded && error === 403 && (
+                <span>Login unsucceeded. Bad credentials.</span>
+              )}
+            </Alert>
           )}
         </div>
       </div>

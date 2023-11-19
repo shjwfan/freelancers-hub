@@ -1,4 +1,4 @@
-package org.shjwfan.web;
+package org.shjwfan.web.restcontrollers.advice;
 
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;

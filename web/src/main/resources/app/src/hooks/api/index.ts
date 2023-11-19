@@ -1,5 +1,12 @@
 import * as axios from 'axios';
-import { Token } from './models';
+import { LoginApi } from './security';
+import { PacksApi, ThemesApi, WorksApi } from './business';
+
+enum RequestResult {
+  Loading = 'Loading',
+  Succeeded = 'Succeeded',
+  UnSucceeded = 'UnSucceeded',
+}
 
 const PERMIT_ALL_URLS = ['/api/v1/login', '/api/v1/login/refresh'];
 
@@ -11,43 +18,16 @@ const permitAll = (config: axios.InternalAxiosRequestConfig) => {
   );
 };
 
-export type FooBarApi = {
-  foo: () => Promise<axios.AxiosResponse<string>>;
-  bar: () => Promise<axios.AxiosResponse<string>>;
-};
-
-export type LoginApi = {
-  login: (
-    username: string,
-    password: string,
-  ) => Promise<axios.AxiosResponse<Token>>;
-  loginRefresh: (
-    currentRefreshToken: string,
-  ) => Promise<axios.AxiosResponse<Token>>;
-};
-
-export type ApiInstance = {
-  fooBarApi: FooBarApi;
-  loginApi: LoginApi;
-};
-
 const axiosInstance: axios.AxiosInstance = axios.default.create({
   baseURL: (import.meta.env.VITE_API_BASE_URL as string) ?? window.origin,
 });
 
-const apiInstance: ApiInstance = {
-  fooBarApi: {
-    foo: () => {
-      const baseURL = axiosInstance.defaults.baseURL ?? window.origin;
-      const url = new URL(`${baseURL}/api/v1/foo`);
-      return axiosInstance.get(url.toString());
-    },
-    bar: () => {
-      const baseURL = axiosInstance.defaults.baseURL ?? window.origin;
-      const url = new URL(`${baseURL}/api/v1/bar`);
-      return axiosInstance.get(url.toString());
-    },
-  },
+const api: {
+  loginApi: LoginApi;
+  packsApi: PacksApi;
+  themesApi: ThemesApi;
+  worksApi: WorksApi;
+} = {
   loginApi: {
     login: (username: string, password: string) => {
       const baseURL = axiosInstance.defaults.baseURL ?? window.origin;
@@ -63,6 +43,30 @@ const apiInstance: ApiInstance = {
       const url = new URL(`${baseURL}/api/v1/login/refresh`);
 
       url.searchParams.set('refreshToken', currentRefreshToken);
+
+      return axiosInstance.get(url.toString());
+    },
+  },
+  packsApi: {
+    loadPacks: () => {
+      const baseURL = axiosInstance.defaults.baseURL ?? window.origin;
+      const url = new URL(`${baseURL}/api/v1/packs`);
+
+      return axiosInstance.get(url.toString());
+    },
+  },
+  themesApi: {
+    loadThemes: () => {
+      const baseURL = axiosInstance.defaults.baseURL ?? window.origin;
+      const url = new URL(`${baseURL}/api/v1/themes`);
+
+      return axiosInstance.get(url.toString());
+    },
+  },
+  worksApi: {
+    loadWorks: () => {
+      const baseURL = axiosInstance.defaults.baseURL ?? window.origin;
+      const url = new URL(`${baseURL}/api/v1/works`);
 
       return axiosInstance.get(url.toString());
     },
@@ -103,16 +107,9 @@ axiosInstance.interceptors.response.use(
               localStorage.accessToken = '';
               localStorage.refreshToken = '';
 
-              apiInstance.loginApi
+              api.loginApi
                 .loginRefresh(currentRefreshToken)
-                .then(response => {
-                  if (response.status != 200) {
-                    throw new Error(
-                      `unsucceeded login refresh request result with status: ${response.status}`,
-                    );
-                  }
-                  return response.data;
-                })
+                .then(response => response.data)
                 .then(data => {
                   localStorage.accessToken = data.accessToken;
                   localStorage.refreshToken = data.refreshToken;
@@ -126,26 +123,20 @@ axiosInstance.interceptors.response.use(
 
           return refreshPromise
             .then(config => axiosInstance(withAccessToken(config)))
-            .catch(error => {
-              console.debug(error);
-              return Promise.reject(error);
-            });
+            .catch(error => Promise.reject(error));
         }
       } else {
         return refreshPromise
           .then(config => axiosInstance(withAccessToken(config)))
-          .catch(error => {
-            console.debug(error);
-            return Promise.reject(error);
-          });
+          .catch(error => Promise.reject(error));
       }
     }
 
-    console.debug(error);
     return Promise.reject(error);
   },
 );
 
-const useApi = () => apiInstance;
+const useApi = () => api;
 
+export { RequestResult };
 export default useApi;

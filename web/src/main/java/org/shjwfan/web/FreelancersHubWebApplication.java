@@ -14,13 +14,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableAutoConfiguration
 @ComponentScans({@ComponentScan("org.shjwfan")})
 @Configuration
-public class Main implements WebMvcConfigurer {
+public class FreelancersHubWebApplication implements WebMvcConfigurer {
 
   public static final Map<String, String[]> RESOURCE_HANDLER_2_RESOURCE_LOCATIONS = Map.of("/assets/**", new String[]{"classpath:/app/dist/assets/"});
   public static final Map<String, String> VIEW_CONTROLLER_2_VIEW_NAME = Map.of("/app/**", "index.html");
 
   public static void main(String[] args) {
-    var app = new SpringApplication(Main.class);
+    var app = new SpringApplication(FreelancersHubWebApplication.class);
     app.setBannerMode(Mode.OFF);
     app.run(args);
   }

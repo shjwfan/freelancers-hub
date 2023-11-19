@@ -32,14 +32,38 @@ const Navbar = () => {
               </li>
               <li className='nav-item'>
                 <NavLink
-                  to='foo-bar'
+                  to='packs'
                   className={({ isActive, isPending: isDisabled }) =>
                     `nav-link ${isActive ? 'active' : ''} ${
                       isDisabled ? 'disabled' : ''
                     }`
                   }
                 >
-                  Foo & Bar
+                  Packs
+                </NavLink>
+              </li>
+              <li className='nav-item'>
+                <NavLink
+                  to='themes'
+                  className={({ isActive, isPending: isDisabled }) =>
+                    `nav-link ${isActive ? 'active' : ''} ${
+                      isDisabled ? 'disabled' : ''
+                    }`
+                  }
+                >
+                  Themes
+                </NavLink>
+              </li>
+              <li className='nav-item'>
+                <NavLink
+                  to='works'
+                  className={({ isActive, isPending: isDisabled }) =>
+                    `nav-link ${isActive ? 'active' : ''} ${
+                      isDisabled ? 'disabled' : ''
+                    }`
+                  }
+                >
+                  Works
                 </NavLink>
               </li>
             </ul>

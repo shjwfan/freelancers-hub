@@ -50,7 +50,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
-          <mainClass>org.shjwfan.web.Main</mainClass>
+          <mainClass>org.shjwfan.web.FreelancersHubWebApplication</mainClass>
         </configuration>
       </plugin>
     </plugins>
