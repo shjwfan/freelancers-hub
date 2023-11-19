@@ -7,8 +7,8 @@ import {
 import Navbar from './components/Navbar.tsx';
 import LoginForm from './components/forms/LoginForm.tsx';
 import PacksTable from './components/tables/PacksTable.tsx';
-import WorksTable from './components/tables/WorksTable.tsx';
 import ThemesTable from './components/tables/ThemesTable.tsx';
+import WorksTable from './components/tables/WorksTable.tsx';
 
 const router = createBrowserRouter(
   createRoutesFromChildren(
