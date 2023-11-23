@@ -54,12 +54,6 @@ const LoginForm = () => {
       <div className='row'>
         <div className='col-md-3 m-auto mt-5 text-center'>
           <h2 className='permanent-marker'>Login</h2>
-          <span className='text-secondary'>
-            No account yet?{' '}
-            <a className='link-offset-1' href='#'>
-              Create one
-            </a>
-          </span>
         </div>
       </div>
       <div className='row'>
