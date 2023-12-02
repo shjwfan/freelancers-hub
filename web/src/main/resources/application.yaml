@@ -13,3 +13,6 @@ freelancers-hub:
       accountLocked: false
       credentialsExpiredAt: 2024-05-24T00:00:00Z
       enabled: true
+
+logging:
+  config: logging-config.xml # classpath:logging-config.xml - logback
