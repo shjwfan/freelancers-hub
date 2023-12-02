@@ -48,11 +48,11 @@ public class Jose4JTokenService2 implements TokenService {
   @Override
   public Token create(String subject) {
     long accessTokenExpirationMs = tokenConfigurationProperties.getAccessTokenExpirationMs();
-    String signedAccessToken = create(accessTokenExpirationMs, subject);
+    String accessToken = create(accessTokenExpirationMs, subject);
     long refreshTokenExpirationMs = tokenConfigurationProperties.getRefreshTokenExpirationMs();
-    String signedRefreshToken = create(refreshTokenExpirationMs, subject);
+    String refreshToken = create(refreshTokenExpirationMs, subject);
 
-    Token token = new Token(signedAccessToken, signedRefreshToken);
+    Token token = new Token(accessToken, refreshToken);
     tokenHolder.put(subject, token);
 
     logger.trace("create {} token {}", subject, token);
