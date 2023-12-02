@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.NumericDate;
 import org.jose4j.jwt.consumer.ErrorCodes;
 import org.jose4j.jwt.consumer.InvalidJwtException;
@@ -114,7 +115,7 @@ public class Jose4JTokenService2 implements TokenService {
   private String getSubject(String token) {
     try {
       return process(token).getSubject();
-    } catch (Exception e) {
+    } catch (MalformedClaimException e) {
       throw new IllegalStateException();
     }
   }

@@ -9,10 +9,7 @@ freelancers-hub:
     - authorities: ADMIN
       password: andrey
       username: andrey
-      accountExpiredAt: 2024-05-24T00:00:00Z
-      accountLocked: false
-      credentialsExpiredAt: 2024-05-24T00:00:00Z
       enabled: true
 
 logging:
-  config: logging-config.xml # classpath:logging-config.xml - logback
+  config: classpath:logging-config.xml # logging-config.xml - logback
