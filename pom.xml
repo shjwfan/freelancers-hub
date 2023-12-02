@@ -16,6 +16,7 @@
 
   <modules>
     <module>business</module>
+    <module>mail</module>
     <module>security</module>
     <module>web</module>
   </modules>
