@@ -1,6 +1,5 @@
-package org.shjwfan.web.restcontrollers;
+package org.shjwfan.web.restcontrollers.login;
 
-import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.shjwfan.security.token.Token;
 import org.shjwfan.security.token.TokenException;
@@ -12,8 +11,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -23,8 +22,11 @@ public class LoginRestController {
   private @Autowired AuthenticationManager authenticationManager;
   private @Autowired UserDetailsService userDetailsService;
 
-  @GetMapping("/api/v1/login")
-  public Token token(@Nonnull @RequestParam("username") String username, @Nonnull @RequestParam("password") String password) {
+  @PostMapping("/api/v1/login")
+  public LoginResponseBody token(@RequestBody LoginRequestBody requestBody) {
+    String username = requestBody.username();
+    String password = requestBody.password();
+
     if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
       throw new TokenException("username or password is blank");
     }
@@ -34,11 +36,14 @@ public class LoginRestController {
     SecurityContext context = SecurityContextHolder.getContext();
     context.setAuthentication(authentication);
 
-    return tokenService.create(username);
+    Token token = tokenService.create(username);
+    return new LoginResponseBody(token.accessToken(), token.refreshToken());
   }
 
-  @GetMapping("/api/v1/login/refresh")
-  public Token tokenRefresh(@Nonnull @RequestParam("refreshToken") String currentRefreshToken) {
+  @PostMapping("/api/v1/login/refresh")
+  public LoginResponseBody tokenRefresh(@RequestBody LoginRefreshRequestBody requestBody) {
+    String currentRefreshToken = requestBody.currentRefreshToken();
+
     if (StringUtils.isBlank(currentRefreshToken)) {
       throw new TokenException("refresh token is blank");
     }
@@ -52,6 +57,7 @@ public class LoginRestController {
     SecurityContext context = SecurityContextHolder.getContext();
     context.setAuthentication(authentication);
 
-    return tokenService.create(username);
+    Token token = tokenService.create(username);
+    return new LoginResponseBody(token.accessToken(), token.refreshToken());
   }
 }

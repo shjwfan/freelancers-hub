@@ -33,18 +33,13 @@ const api: {
       const baseURL = axiosInstance.defaults.baseURL ?? window.origin;
       const url = new URL(`${baseURL}/api/v1/login`);
 
-      url.searchParams.set('username', username);
-      url.searchParams.set('password', password);
-
-      return axiosInstance.get(url.toString());
+      return axiosInstance.post(url.toString(), { username, password });
     },
     loginRefresh: (currentRefreshToken: string) => {
       const baseURL = axiosInstance.defaults.baseURL ?? window.origin;
       const url = new URL(`${baseURL}/api/v1/login/refresh`);
 
-      url.searchParams.set('refreshToken', currentRefreshToken);
-
-      return axiosInstance.get(url.toString());
+      return axiosInstance.post(url.toString(), { currentRefreshToken });
     },
   },
   packsApi: {
