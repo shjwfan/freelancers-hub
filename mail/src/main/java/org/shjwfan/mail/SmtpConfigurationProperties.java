@@ -3,7 +3,7 @@ package org.shjwfan.mail;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@ConfigurationProperties("freelancers-hub.smtp")
+@ConfigurationProperties("freelancers-hub.mail.smtp")
 @Configuration
 public class SmtpConfigurationProperties {
 

@@ -39,6 +39,7 @@ public class MailService {
   public void send(String recipient, String subject, String content) {
     Session session = getSessionInstance();
 
+    // from "noreply@..."?
     String from = username;
 
     CompletableFuture.runAsync(() -> {

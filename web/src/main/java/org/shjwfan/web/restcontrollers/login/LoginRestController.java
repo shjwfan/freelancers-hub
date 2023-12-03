@@ -23,12 +23,12 @@ public class LoginRestController {
   private @Autowired UserDetailsService userDetailsService;
 
   @PostMapping("/api/v1/login")
-  public LoginResponseBody token(@RequestBody LoginRequestBody requestBody) {
+  public LoginResponseBody login(@RequestBody LoginRequestBody requestBody) {
     String username = requestBody.username();
     String password = requestBody.password();
 
     if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
-      throw new TokenException("username or password is blank");
+      throw new TokenException("username or actualPassword is blank");
     }
 
     var authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
@@ -36,12 +36,12 @@ public class LoginRestController {
     SecurityContext context = SecurityContextHolder.getContext();
     context.setAuthentication(authentication);
 
-    Token token = tokenService.create(username);
+    Token token = tokenService.createToken(username);
     return new LoginResponseBody(token.accessToken(), token.refreshToken());
   }
 
   @PostMapping("/api/v1/login/refresh")
-  public LoginResponseBody tokenRefresh(@RequestBody LoginRefreshRequestBody requestBody) {
+  public LoginResponseBody loginRefresh(@RequestBody LoginRefreshRequestBody requestBody) {
     String currentRefreshToken = requestBody.currentRefreshToken();
 
     if (StringUtils.isBlank(currentRefreshToken)) {
@@ -57,7 +57,7 @@ public class LoginRestController {
     SecurityContext context = SecurityContextHolder.getContext();
     context.setAuthentication(authentication);
 
-    Token token = tokenService.create(username);
+    Token token = tokenService.createToken(username);
     return new LoginResponseBody(token.accessToken(), token.refreshToken());
   }
 }

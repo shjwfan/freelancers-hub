@@ -1,7 +1,6 @@
-package org.shjwfan.web.restcontrollers.advice;
+package org.shjwfan.web.restcontrollers.login;
 
 import jakarta.annotation.Nonnull;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.shjwfan.security.token.TokenException;
@@ -16,7 +15,7 @@ public class LoginRestControllerAdvice {
   private @Autowired TokenExceptionHandler tokenExceptionHandler;
 
   @ExceptionHandler(TokenException.class)
-  public void handleTokenException(@Nonnull TokenException e, @Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) throws IOException {
-    tokenExceptionHandler.handleTokenException(e, request, response);
+  public void handleTokenException(@Nonnull TokenException e, @Nonnull HttpServletResponse response) throws IOException {
+    tokenExceptionHandler.handleTokenException(e, response);
   }
 }

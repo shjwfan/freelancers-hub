@@ -21,4 +21,16 @@ public class ThymeleafConfiguration {
 
     return templateResolver;
   }
+
+  @Bean
+  public ITemplateResolver mailTemplateResolver() {
+    SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
+
+    templateResolver.setCharacterEncoding(UTF_8.name());
+    templateResolver.setCheckExistence(true);
+    templateResolver.setPrefix("classpath:/mail/");
+    templateResolver.setOrder(0);
+
+    return templateResolver;
+  }
 }

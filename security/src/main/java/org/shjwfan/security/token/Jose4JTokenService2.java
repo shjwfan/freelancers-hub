@@ -1,6 +1,9 @@
 package org.shjwfan.security.token;
 
 import static org.jose4j.jws.AlgorithmIdentifiers.HMAC_SHA256;
+import static org.shjwfan.security.token.PasswordResetTokenService.PasswordResetSummary.ACTUAL_PASSWORD_CLAIM_NAME;
+import static org.shjwfan.security.token.PasswordResetTokenService.PasswordResetSummary.CONFIRM_REDIRECT_CLAIM_NAME;
+import static org.shjwfan.security.token.PasswordResetTokenService.PasswordResetSummary.DISCARD_REDIRECT_CLAIM_NAME;
 
 import java.security.Key;
 import java.security.SecureRandom;
@@ -16,25 +19,26 @@ import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.keys.HmacKey;
 import org.jose4j.lang.JoseException;
+import org.shjwfan.security.FreelancersHubSecurityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class Jose4JTokenService2 implements TokenService {
+public class Jose4JTokenService2 implements PasswordResetTokenService, TokenService {
 
-  private static final Map<Integer, String> ERROR_CODE_2_MESSAGE = Map.of(
-      ErrorCodes.AUDIENCE_INVALID, "token has invalid audience",
-      ErrorCodes.EXPIRED, "token has expired",
-      ErrorCodes.ISSUER_INVALID, "token has invalid issuer");
+  private static final Map<Integer, String> ERROR_CODE_2_MESSAGE = Map.of(ErrorCodes.AUDIENCE_INVALID, "token has invalid audience", ErrorCodes.EXPIRED, "token has expired", ErrorCodes.ISSUER_INVALID, "token has invalid issuer");
+  private static final String ISSUER = "www.freelancers-hub.org";
 
-  private final TokenConfigurationProperties tokenConfigurationProperties;
+  private final FreelancersHubSecurityProperties freelancersHubSecurityProperties;
+  private final PasswordResetTokenHolder passwordResetTokenHolder;
   private final TokenHolder tokenHolder;
   private final Key key;
   private final Logger logger;
 
-  public Jose4JTokenService2(TokenConfigurationProperties tokenConfigurationProperties, TokenHolder tokenHolder) {
-    this.tokenConfigurationProperties = tokenConfigurationProperties;
+  public Jose4JTokenService2(FreelancersHubSecurityProperties freelancersHubSecurityProperties, PasswordResetTokenHolder passwordResetTokenHolder, TokenHolder tokenHolder) {
+    this.freelancersHubSecurityProperties = freelancersHubSecurityProperties;
+    this.passwordResetTokenHolder = passwordResetTokenHolder;
     this.tokenHolder = tokenHolder;
 
     byte[] bytes = new byte[256];
@@ -46,30 +50,51 @@ public class Jose4JTokenService2 implements TokenService {
   }
 
   @Override
-  public Token create(String subject) {
-    long accessTokenExpirationMs = tokenConfigurationProperties.getAccessTokenExpirationMs();
-    String accessToken = create(accessTokenExpirationMs, subject);
-    long refreshTokenExpirationMs = tokenConfigurationProperties.getRefreshTokenExpirationMs();
-    String refreshToken = create(refreshTokenExpirationMs, subject);
+  public String createPasswordResetToken(PasswordResetSummary summary) {
+    String subject = summary.username();
+    Map<String, Object> claims = Map.of(ACTUAL_PASSWORD_CLAIM_NAME, summary.actualPassword(), CONFIRM_REDIRECT_CLAIM_NAME, summary.confirmRedirect(), DISCARD_REDIRECT_CLAIM_NAME, summary.discardRedirect());
+
+    String passwordResetTokenAudience = freelancersHubSecurityProperties.getPasswordResetToken().getAudience();
+    long passwordResetTokenExpirationMs = freelancersHubSecurityProperties.getPasswordResetToken().getExpirationMs();
+    String passwordResetToken = create(passwordResetTokenAudience, passwordResetTokenExpirationMs, subject, claims);
+
+    passwordResetTokenHolder.putPasswordResetToken(subject, passwordResetToken);
+
+    logger.trace("create {} password reset token {}", subject, passwordResetToken);
+    return passwordResetToken;
+  }
+
+  @Override
+  public Token createToken(String subject) {
+    String accessTokenAudience = freelancersHubSecurityProperties.getAccessToken().getAudience();
+    long accessTokenExpirationMs = freelancersHubSecurityProperties.getAccessToken().getExpirationMs();
+    String accessToken = create(accessTokenAudience, accessTokenExpirationMs, subject, Map.of());
+    String refreshTokenAudience = freelancersHubSecurityProperties.getRefreshToken().getAudience();
+    long refreshTokenExpirationMs = freelancersHubSecurityProperties.getRefreshToken().getExpirationMs();
+    String refreshToken = create(refreshTokenAudience, refreshTokenExpirationMs, subject, Map.of());
 
     Token token = new Token(accessToken, refreshToken);
-    tokenHolder.put(subject, token);
+    tokenHolder.putToken(subject, token);
 
     logger.trace("create {} token {}", subject, token);
     return token;
   }
 
-  private String create(long expirationTimeMillis, String subject) {
+  private String create(String audience, long expirationTimeMillis, String subject, Map<String, Object> claims) {
     long issuedAtTimeMillis = System.currentTimeMillis();
 
     JsonWebSignature jsonWebSignature = new JsonWebSignature();
 
     JwtClaims jwtClaims = new JwtClaims();
-    jwtClaims.setAudience(tokenConfigurationProperties.getAudience());
+    jwtClaims.setAudience(audience);
     jwtClaims.setExpirationTime(NumericDate.fromMilliseconds(issuedAtTimeMillis + expirationTimeMillis));
     jwtClaims.setIssuedAt(NumericDate.fromMilliseconds(issuedAtTimeMillis));
-    jwtClaims.setIssuer(tokenConfigurationProperties.getIssuer());
+    jwtClaims.setIssuer(ISSUER);
     jwtClaims.setSubject(subject);
+
+    claims.forEach((claimName, value) -> {
+      jwtClaims.setClaim(claimName, value);
+    });
 
     String payload = jwtClaims.toJson();
     jsonWebSignature.setPayload(payload);
@@ -80,62 +105,77 @@ public class Jose4JTokenService2 implements TokenService {
     try {
       return jsonWebSignature.getCompactSerialization();
     } catch (JoseException e) {
-      String message = String.format("can't create %s token", subject);
-      logger.trace(message, e);
-      throw new TokenException(message);
+      throw new TokenException("can't create %s token " + subject, e);
     }
+  }
+
+  @Override
+  public PasswordResetSummary verifyPasswordResetToken(String passwordResetToken) {
+    JwtClaims jwtClaims = process(freelancersHubSecurityProperties.getPasswordResetToken().getAudience(), passwordResetToken);
+    String subject;
+    try {
+      subject = jwtClaims.getSubject();
+    } catch (MalformedClaimException e) {
+      throw new IllegalStateException("subject expected");
+    }
+    String createdPasswordResetToken = passwordResetTokenHolder.removePasswordResetToken(subject).orElse(null);
+    if (StringUtils.equals(createdPasswordResetToken, passwordResetToken)) {
+      String actualPassword = jwtClaims.getClaimValueAsString(ACTUAL_PASSWORD_CLAIM_NAME);
+      if (StringUtils.isBlank(actualPassword)) {
+        throw new TokenException(ACTUAL_PASSWORD_CLAIM_NAME + " claim is blank");
+      }
+      String confirmRedirect = jwtClaims.getClaimValueAsString(CONFIRM_REDIRECT_CLAIM_NAME);
+      if (StringUtils.isBlank(confirmRedirect)) {
+        throw new TokenException(CONFIRM_REDIRECT_CLAIM_NAME + " claim is blank");
+      }
+      String discardRedirect = jwtClaims.getClaimValueAsString(DISCARD_REDIRECT_CLAIM_NAME);
+      if (StringUtils.isBlank(discardRedirect)) {
+        throw new TokenException(DISCARD_REDIRECT_CLAIM_NAME + " claim is blank");
+      }
+      return new PasswordResetSummary(subject, actualPassword, confirmRedirect, discardRedirect);
+    }
+    throw new TokenException(subject + " created password reset token doesn't match password reset token");
   }
 
   @Override
   public String verifyAccessToken(String accessToken) {
-    String subject = getSubject(accessToken);
-    String createdAccessToken = tokenHolder.get(subject).map(Token::accessToken).orElse(null);
+    JwtClaims jwtClaims = process(freelancersHubSecurityProperties.getPasswordResetToken().getAudience(), accessToken);
+    String subject;
+    try {
+      subject = jwtClaims.getSubject();
+    } catch (MalformedClaimException e) {
+      throw new IllegalStateException("subject expected");
+    }
+    String createdAccessToken = tokenHolder.getToken(subject).map(Token::accessToken).orElse(null);
     if (StringUtils.equals(createdAccessToken, accessToken)) {
       return subject;
     }
-
-    String message = String.format("%s created access token doesn't match access token", subject);
-    logger.trace(message);
-    throw new TokenException(message);
+    throw new TokenException(subject + " created access token doesn't match access token");
   }
 
   @Override
   public String verifyRefreshToken(String refreshToken) {
-    String subject = getSubject(refreshToken);
-    String createdRefreshToken = tokenHolder.remove(subject).map(Token::refreshToken).orElse(null);
+    JwtClaims jwtClaims = process(freelancersHubSecurityProperties.getPasswordResetToken().getAudience(), refreshToken);
+    String subject;
+    try {
+      subject = jwtClaims.getSubject();
+    } catch (MalformedClaimException e) {
+      throw new IllegalStateException("subject expected");
+    }
+    String createdRefreshToken = tokenHolder.removeToken(subject).map(Token::refreshToken).orElse(null);
     if (StringUtils.equals(createdRefreshToken, refreshToken)) {
       return subject;
     }
-
-    String message = String.format("%s created refresh token doesn't match refresh token", subject);
-    logger.trace(message);
-    throw new TokenException(message);
+    throw new TokenException(subject + " created refresh token doesn't match refresh token");
   }
 
-  private String getSubject(String token) {
-    try {
-      return process(token).getSubject();
-    } catch (MalformedClaimException e) {
-      throw new IllegalStateException();
-    }
-  }
-
-  private JwtClaims process(String token) {
-    JwtConsumer jwtConsumer = new JwtConsumerBuilder()
-        .setExpectedAudience(true, tokenConfigurationProperties.getAudience())
-        .setRequireExpirationTime()
-        .setExpectedIssuer(true, tokenConfigurationProperties.getIssuer())
-        .setRequireSubject()
-        .setVerificationKey(key)
-        .build();
-
+  private JwtClaims process(String audience, String token) {
+    JwtConsumer jwtConsumer = new JwtConsumerBuilder().setExpectedAudience(audience).setRequireExpirationTime().setExpectedIssuer(ISSUER).setRequireSubject().setVerificationKey(key).build();
     try {
       return jwtConsumer.process(token).getJwtClaims();
     } catch (InvalidJwtException e) {
       handleInvalidJwtException(e);
-      String message = String.format("can't process token %s", token);
-      logger.trace(message, e);
-      throw new TokenException(message);
+      throw new TokenException("can't process token " + token, e);
     }
   }
 

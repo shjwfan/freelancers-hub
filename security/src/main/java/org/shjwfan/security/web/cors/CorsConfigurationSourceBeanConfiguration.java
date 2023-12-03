@@ -1,6 +1,6 @@
 package org.shjwfan.security.web.cors;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.shjwfan.security.FreelancersHubSecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,11 +11,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class CorsConfigurationSourceBeanConfiguration {
 
-  private final long maxAgeMilliseconds;
+  private final FreelancersHubSecurityProperties freelancersHubSecurityProperties;
 
-  public CorsConfigurationSourceBeanConfiguration(
-      @Value("${freelancers-hub.cors-max-age-ms:90000}") int maxAgeMilliseconds) {
-    this.maxAgeMilliseconds = maxAgeMilliseconds;
+  public CorsConfigurationSourceBeanConfiguration(FreelancersHubSecurityProperties freelancersHubSecurityProperties) {
+    this.freelancersHubSecurityProperties = freelancersHubSecurityProperties;
   }
 
   @Bean
@@ -32,7 +31,7 @@ public class CorsConfigurationSourceBeanConfiguration {
 
     corsConfiguration.setAllowCredentials(true);
 
-    corsConfiguration.setMaxAge(maxAgeMilliseconds);
+    corsConfiguration.setMaxAge(freelancersHubSecurityProperties.getCors().getMaxAgeMillis());
 
     return corsConfiguration;
   }

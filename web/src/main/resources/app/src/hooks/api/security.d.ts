@@ -11,4 +11,13 @@ type LoginApi = {
   ) => Promise<axios.AxiosResponse<Token>>;
 };
 
-export type { LoginApi };
+type PasswordResetApi = {
+  askPasswordResetThroughEmail: (
+    email: string,
+    actualPassword: string,
+    confirmRedirect: string,
+    discardRedirect: string,
+  ) => Promise<axios.AxiosResponse<void>>;
+};
+
+export type { LoginApi, PasswordResetApi };

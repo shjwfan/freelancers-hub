@@ -2,7 +2,7 @@ package org.shjwfan.security.token;
 
 public interface TokenService {
 
-  Token create(String subject);
+  Token createToken(String subject);
 
   String verifyAccessToken(String accessToken);
 

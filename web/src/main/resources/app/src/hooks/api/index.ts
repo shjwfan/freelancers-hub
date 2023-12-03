@@ -1,5 +1,5 @@
 import * as axios from 'axios';
-import { LoginApi } from './security';
+import { LoginApi, PasswordResetApi } from './security';
 import { PacksApi, ThemesApi, WorksApi } from './business';
 
 enum RequestResult {
@@ -8,7 +8,11 @@ enum RequestResult {
   UnSucceeded = 'UnSucceeded',
 }
 
-const PERMIT_ALL_URLS = ['/api/v1/login', '/api/v1/login/refresh'];
+const PERMIT_ALL_URLS = [
+  '/api/v1/login',
+  '/api/v1/login/refresh',
+  '/api/v1/password-reset/email/ask',
+];
 
 const permitAll = (config: axios.InternalAxiosRequestConfig) => {
   return (
@@ -24,6 +28,7 @@ const axiosInstance: axios.AxiosInstance = axios.default.create({
 
 const api: {
   loginApi: LoginApi;
+  passwordResetApi: PasswordResetApi;
   packsApi: PacksApi;
   themesApi: ThemesApi;
   worksApi: WorksApi;
@@ -40,6 +45,24 @@ const api: {
       const url = new URL(`${baseURL}/api/v1/login/refresh`);
 
       return axiosInstance.post(url.toString(), { currentRefreshToken });
+    },
+  },
+  passwordResetApi: {
+    askPasswordResetThroughEmail: (
+      email: string,
+      actualPassword: string,
+      confirmRedirect: string,
+      discardRedirect: string,
+    ) => {
+      const baseURL = axiosInstance.defaults.baseURL ?? window.origin;
+      const url = new URL(`${baseURL}/api/v1/password-reset/email/ask`);
+
+      return axiosInstance.post(url.toString(), {
+        email,
+        actualPassword,
+        confirmRedirect,
+        discardRedirect,
+      });
     },
   },
   packsApi: {

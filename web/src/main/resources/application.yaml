@@ -1,8 +1,21 @@
 freelancers-hub:
-  token-audience: www.freelancers-hub.org
-  token-issuer: www.freelancers-hub.org
+  mail:
+    smtp:
+      host: # specify
+      port: # specify
+      username: # specify
+      password: # specify
+  security:
+    accessToken:
+      expirationMs: 45000
+    refreshToken:
+      expirationMs: 90000
+    passwordResetToken:
+      expirationMs: 180000
+
   users:
-    - authorities: ADMIN
+    - email: # specify
+      authorities: ADMIN
       password: andrey
       username: andrey
       enabled: true

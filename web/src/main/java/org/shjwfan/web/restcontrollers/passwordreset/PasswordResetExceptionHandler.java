@@ -1,4 +1,4 @@
-package org.shjwfan.security.token;
+package org.shjwfan.web.restcontrollers.passwordreset;
 
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TokenExceptionHandler {
+public class PasswordResetExceptionHandler {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
-  public void handleTokenException(@Nonnull TokenException e, @Nonnull HttpServletResponse response) throws IOException {
+  public void handlePasswordResetException(@Nonnull PasswordResetException e, @Nonnull HttpServletResponse response) throws IOException {
     logger.trace(e.getMessage(), e);
     response.setContentType("application/json");
-    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    response.setStatus(e.getStatus());
 
     String message = e.getMessage();
     if (message != null) {

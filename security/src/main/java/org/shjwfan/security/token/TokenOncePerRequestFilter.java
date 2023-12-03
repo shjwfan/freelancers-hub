@@ -32,7 +32,7 @@ public class TokenOncePerRequestFilter extends OncePerRequestFilter {
   protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     try {
       String accessToken = getAccessToken(request);
-      if (Objects.isNull(accessToken)) {
+      if (StringUtils.isBlank(accessToken)) {
         filterChain.doFilter(request, response);
         return;
       }
@@ -48,14 +48,13 @@ public class TokenOncePerRequestFilter extends OncePerRequestFilter {
 
       filterChain.doFilter(request, response);
     } catch (TokenException e) {
-      tokenExceptionHandler.handleTokenException(e, request, response);
+      tokenExceptionHandler.handleTokenException(e, response);
     }
   }
 
   @Nullable
   private String getAccessToken(HttpServletRequest request) {
     String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
-    String accessToken = StringUtils.substringAfter(authorizationHeader, ACCESS_TOKEN_PREFIX);
-    return Objects.isNull(accessToken) ? null : accessToken;
+    return StringUtils.substringAfter(authorizationHeader, ACCESS_TOKEN_PREFIX);
   }
 }

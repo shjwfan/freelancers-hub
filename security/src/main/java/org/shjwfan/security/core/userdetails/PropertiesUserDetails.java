@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.shjwfan.security.core.FreelancersHubAuthority;
 import org.springframework.security.core.GrantedAuthority;
 
-public class ConfigurationPropertiesUserDetails implements FreelancersHubUserDetails {
+public class PropertiesUserDetails implements EmailBasedUserDetails {
 
   private String email = "";
   private Set<? extends GrantedAuthority> authorities = Set.of();
@@ -103,7 +103,7 @@ public class ConfigurationPropertiesUserDetails implements FreelancersHubUserDet
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ConfigurationPropertiesUserDetails user = (ConfigurationPropertiesUserDetails) o;
+    PropertiesUserDetails user = (PropertiesUserDetails) o;
     return new EqualsBuilder().append(email, email).append(username, user.username).isEquals();
   }
 

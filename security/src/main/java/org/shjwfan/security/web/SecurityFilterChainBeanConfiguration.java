@@ -22,9 +22,11 @@ public class SecurityFilterChainBeanConfiguration {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(authorizeHttpRequest -> {
-          // permit all POST /api/v1/login, POST /api/v1/login/refresh requests
-          authorizeHttpRequest.requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
-              .requestMatchers(HttpMethod.POST, "/api/v1/login/refresh").permitAll()
+          // permit all POST /api/v1/login/**
+          authorizeHttpRequest.requestMatchers(HttpMethod.POST, "/api/v1/login/**").permitAll()
+              .requestMatchers(HttpMethod.POST, "/api/v1/password-reset/email/ask").permitAll()
+              .requestMatchers(HttpMethod.GET, "/api/v1/password-reset/email/confirm").permitAll()
+              .requestMatchers(HttpMethod.GET, "/api/v1/password-reset/email/discard").permitAll()
               .requestMatchers(HttpMethod.GET, "/assets/**").permitAll()
               .requestMatchers(HttpMethod.GET, "/app/**").permitAll()
               .requestMatchers("/api/v1/**").hasAuthority(ADMIN.getAuthority());

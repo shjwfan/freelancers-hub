@@ -24,14 +24,8 @@
       <totalSizeCap>10MB</totalSizeCap>
     </rollingPolicy>
   </appender>
-  <logger name="org.shjwfan.security.token" level="TRACE">
-    <appender-ref ref="console"/>
-    <appender-ref ref="file"/>
-  </logger>
-  <logger name="org.shjwfan.mail" level="TRACE">
-    <appender-ref ref="console"/>
-    <appender-ref ref="file"/>
-  </logger>
+  <logger name="org.shjwfan.security.token" level="TRACE" />
+  <logger name="org.shjwfan.mail" level="TRACE" />
   <root level="info">
     <appender-ref ref="console"/>
     <appender-ref ref="file"/>

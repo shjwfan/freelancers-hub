@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import useApi, { RequestResult } from '../../hooks/api';
+import { Link } from 'react-router-dom';
+import useApi, { RequestResult } from '../../../hooks/api';
 import * as axios from 'axios';
-import Alert from '../Alert.tsx';
-import { PASSWORD_PATTERN, USERNAME_PATTERN } from './utils.ts';
+import Alert from '../../Alert.tsx';
+import { PASSWORD_PATTERN, USERNAME_PATTERN } from '../utils.ts';
 
 type Credentials = {
   username: string;
@@ -32,6 +33,7 @@ const LoginForm = () => {
       .login(credentials.username, credentials.password)
       .then(response => response.data)
       .then(data => {
+        setError(null);
         setRequestResult(RequestResult.Succeeded);
 
         localStorage.accessToken = data.accessToken;
@@ -110,16 +112,22 @@ const LoginForm = () => {
           <button className='btn btn-primary mt-3' type='submit'>
             Login
           </button>
+          <div className='text-secondary mt-2'>
+            <Link to={'/password-reset/email/ask'}>Reset</Link> password through
+            email.
+          </div>
           {requestResult && (
             <Alert requestResult={requestResult}>
-              {requestResult === RequestResult.Loading && !error && (
+              {requestResult === RequestResult.Loading && (
                 <span>Loading...</span>
               )}
-              {requestResult === RequestResult.Succeeded && !error && (
+              {requestResult === RequestResult.Succeeded && (
                 <span>Login succeeded.</span>
               )}
-              {requestResult === RequestResult.UnSucceeded && error === 403 && (
-                <span>Login unsucceeded. Bad credentials.</span>
+              {requestResult === RequestResult.UnSucceeded && error && (
+                <span>
+                  Login unsucceeded. {error == 403 ? 'Bad credentials.' : ''}
+                </span>
               )}
             </Alert>
           )}
